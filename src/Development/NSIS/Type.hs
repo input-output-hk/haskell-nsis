@@ -15,17 +15,17 @@ instance Show Var where show (Var i) = "$_" ++ show i
 
 
 -- | A code label, used for @goto@ programming, see 'Development.NSIS.Sugar.newLabel'.
-newtype Label = Label Int deriving (Data,Typeable,Eq)
+newtype Label = Label Int deriving (Data,Eq)
 instance Show Label where show (Label i) = if i == 0 then "0" else "_lbl" ++ show i
 
 
-newtype Fun = Fun String deriving (Data,Typeable,Eq,Ord)
+newtype Fun = Fun String deriving (Data,Eq,Ord)
 instance Show Fun where show (Fun i) = i
 
 newFun :: Int -> Fun
 newFun i = Fun $ "_fun" ++ show i
 
-newtype SectionId = SectionId Int deriving (Data,Typeable)
+newtype SectionId = SectionId Int deriving Data
 instance Show SectionId where show (SectionId i) = "${_sec" ++ show i ++ "}"
 
 
@@ -85,6 +85,7 @@ data NSIS
     | OutFile Val
     | InstallDir Val
     | InstallIcon Val
+    | Language String
     | UninstallIcon Val
     | HeaderImage (Maybe Val)
     | Page Page
@@ -153,7 +154,7 @@ data FileMode
     | ModeWrite -- All contents of file are destroyed.
     | ModeAppend -- ^ Opened for both read and write, contents preserved.
      deriving (Data,Typeable,Bounded,Enum,Eq,Ord)
-    
+
 instance Show FileMode where
     show ModeRead = "r"
     show ModeWrite = "w"
@@ -169,7 +170,7 @@ data AShortcut = AShortcut
     ,scStartOptions :: String
     ,scKeyboardShortcut :: String
     ,scDescription :: Val
-    } deriving (Data,Typeable,Show)
+    } deriving (Data,Show)
 
 instance Default AShortcut where def = AShortcut def def def def def def def def
 
@@ -180,7 +181,7 @@ data ASection = ASection
     ,secBold :: Bool
     ,secRequired :: Bool
     ,secUnselected :: Bool
-    } deriving (Data,Typeable,Show)
+    } deriving (Data,Show)
 
 instance Default ASection where def = ASection (SectionId 0) def def False False False
 
@@ -189,15 +190,15 @@ data ASectionGroup = ASectionGroup
     ,secgName :: Val
     ,secgExpanded :: Bool
     ,secgDescription :: Val
-    } deriving (Data,Typeable,Show)
+    } deriving (Data,Show)
 
 instance Default ASectionGroup where def = ASectionGroup (SectionId 0) def False def
 
-data Compressor = LZMA | ZLIB | BZIP2 deriving (Data,Typeable,Show)
+data Compressor = LZMA | ZLIB | BZIP2 deriving (Data,Show)
 
 instance Default Compressor where def = ZLIB
 
-data ACompressor = ACompressor 
+data ACompressor = ACompressor
     {compType :: Compressor
     ,compSolid :: Bool
     ,compFinal :: Bool

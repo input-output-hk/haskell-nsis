@@ -1166,3 +1166,6 @@ unsafeInject = emit . UnsafeInject
 -- | Inject arbitrary text into the script's global header section.
 unsafeInjectGlobal :: String -> Action ()
 unsafeInjectGlobal = emit . UnsafeInjectGlobal
+
+loadLanguage :: String -> Action ()
+loadLanguage = emit . Language

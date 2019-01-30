@@ -71,6 +71,7 @@ module Development.NSIS
     installDirRegKey, allowRootDirInstall, caption,
     showInstDetails, showUninstDetails, unicode,
     requestExecutionLevel,
+    loadLanguage,
     -- ** Sections
     SectionId, section, sectionGroup, newSectionId,
     sectionSetText, sectionGetText, sectionSet, sectionGet,

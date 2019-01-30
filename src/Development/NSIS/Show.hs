@@ -16,12 +16,12 @@ showNSIS xs =
     ["!Include MUI2.nsh"] ++
     ["Var _" ++ show v | v <- sort $ nub [i | Var i <- universeBi xs]] ++
     outs fs (filter isGlobal xs) ++
-    ["!insertmacro MUI_LANGUAGE \"English\""] ++
     (if null plugins then [] else
         ["Function NSIS_UnusedPluginPreload"
         ,"  # Put all plugins are at the start of the archive, ensuring fast extraction (esp. LZMA solid)"] ++
         map indent plugins ++
         ["FunctionEnd"]) ++
+    (concat $ map (out fs) languages) ++
     outs fs (filter isSection xs) ++
     concat [("Function " ++ show name) : map indent (outs fs body) ++ ["FunctionEnd"] | (name,body) <- funs] ++
     (if null descs then [] else
@@ -34,7 +34,11 @@ showNSIS xs =
           funs = map (fst . head &&& concatMap snd) $ groupBy ((==) `on` fst) $ sortBy (compare `on` fst) $
                      [(Fun ".onInit",inits) | not $ null inits] ++ [(name,body) | Function name body <- universeBi xs]
           plugins = sort $ nub [a ++ "::" ++ b | Plugin a b _ <- universeBi xs]
-
+          languages = if (null languages') then [ Language "English" ] else []
+          languages' = filter isLanguage xs
+          isLanguage :: NSIS -> Bool
+          isLanguage (Language _) = True
+          isLanguage _ = False
 
 secDescs :: NSIS -> [(SectionId, Val)]
 secDescs (Section x _) = [(secId x, secDescription x)]
@@ -62,6 +66,7 @@ isGlobal x = case x of
     Caption{} -> True
     Unicode{} -> True
     UnsafeInjectGlobal{} -> True
+    Language{} -> True
     _ -> False
 
 isSection :: NSIS -> Bool
@@ -116,6 +121,7 @@ out fs (SendMessage a b c d e f) = [unwords $ "SendMessage" : show a : show b : 
 out fs (Unicode x) = ["Unicode " ++ if x then "true" else "false"]
 out fs (UnsafeInject x) = [x]
 out fs (UnsafeInjectGlobal x) = [x]
+out fs (Language x) = [ "!insertmacro MUI_LANGUAGE \"" ++ x ++ "\"" ]
 
 out fs x = [show x]
 
